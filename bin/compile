@@ -53,13 +53,29 @@ SBT_BINDIR="$SBT_USER_HOME"/bin
 # chdir as sbt expects
 cd $BUILD_DIR
 
+# unpack cache
+CACHED_DIRS="$SBT_USER_HOME/.ivy2 $SBT_USER_HOME/boot $SBT_BINDIR target project/target project/boot"
+for DIR in $CACHED_DIRS; do
+  cache_copy $DIR $CACHE_DIR $BUILD_DIR
+done
+
+if ! test -e package.json; then
+	echo " !      Error, your project must include package.json"
+        exit 1
+fi
+
+if ! test -e Gruntfile.js; then
+	echo " !      Error, your project must include Gruntfile.js"
+        exit 1
+fi
+
 echo "-----> Installing NodeJS"
 node_version=$(curl --silent --get https://semver.io/node/resolve)
 node_url="http://s3pository.heroku.com/node/v$node_version/node-v$node_version-linux-x64.tar.gz"
-curl $node_url -s -o - | tar xzf - -C $BUILD_DIR
-ln -sf node-v$node_version-linux-x64 $BUILD_DIR/node
-chmod +x $BUILD_DIR/node/bin/*
-PATH=$PATH:$BUILD_DIR/node/bin
+curl $node_url -s -o - | tar xzf -
+ln -sf node-v$node_version-linux-x64 node
+chmod +x node/bin/*
+PATH=$PATH:$PWD/node/bin
 
 echo "-----> Installing Grunt"
 npm install grunt-cli
@@ -67,13 +83,7 @@ npm install grunt
 echo "-----> Installing dependencies in package.json (npm install)"
 npm install
 echo "-----> Running grunt prod"
-$BUILD_DIR/node_modules/.bin/grunt prod
-
-# unpack cache
-CACHED_DIRS="$SBT_USER_HOME/.ivy2 $SBT_USER_HOME/boot $SBT_BINDIR target project/target project/boot"
-for DIR in $CACHED_DIRS; do
-  cache_copy $DIR $CACHE_DIR $BUILD_DIR
-done
+grunt prod
 
 # these are preliminary checks. actual version check happens below when attempting to download sbt boot.properties
 if ! test -e project/build.properties; then
