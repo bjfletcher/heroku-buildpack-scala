@@ -53,6 +53,14 @@ SBT_BINDIR="$SBT_USER_HOME"/bin
 # chdir as sbt expects
 cd $BUILD_DIR
 
+echo "-----> Installing Grunt"
+npm install grunt-cli
+npm install grunt
+echo "-----> Installing dependencies in package.json (npm install)"
+npm install
+echo "-----> Running grunt prod"
+$BUILD_DIR/node_modules/.bin/grunt prod
+
 # unpack cache
 CACHED_DIRS="$SBT_USER_HOME/.ivy2 $SBT_USER_HOME/boot $SBT_BINDIR target project/target project/boot"
 for DIR in $CACHED_DIRS; do
