@@ -4,22 +4,6 @@
 # fail fast
 set -e
 
-echo "-----> Installing NodeJS"
-node_version=$(curl --silent --get https://semver.io/node/resolve)
-node_url="http://s3pository.heroku.com/node/v$node_version/node-v$node_version-linux-x64.tar.gz"
-curl $node_url -s -o - | tar xzf -
-ln -sf node-v$node_version-linux-x64 node
-chmod +x node/bin/*
-PATH=$PATH:$PWD/node/bin
-
-echo "-----> Installing Grunt"
-npm install grunt-cli
-npm install grunt
-echo "-----> Installing dependencies in package.json (npm install)"
-npm install
-echo "-----> Running grunt prod"
-$PWD/node_modules/.bin/grunt prod
-
 BP_DIR=$(cd $(dirname $0)/..; pwd) # absolute path
 BIN_DIR=$BP_DIR/bin
 OPT_DIR=$BP_DIR/opt
@@ -68,6 +52,22 @@ SBT_BINDIR="$SBT_USER_HOME"/bin
 
 # chdir as sbt expects
 cd $BUILD_DIR
+
+echo "-----> Installing NodeJS"
+node_version=$(curl --silent --get https://semver.io/node/resolve)
+node_url="http://s3pository.heroku.com/node/v$node_version/node-v$node_version-linux-x64.tar.gz"
+curl $node_url -s -o - | tar xzf - -C $BUILD_DIR
+ln -sf node-v$node_version-linux-x64 $BUILD_DIR/node
+chmod +x $BUILD_DIR/node/bin/*
+PATH=$PATH:$BUILD_DIR/node/bin
+
+echo "-----> Installing Grunt"
+npm install grunt-cli
+npm install grunt
+echo "-----> Installing dependencies in package.json (npm install)"
+npm install
+echo "-----> Running grunt prod"
+$BUILD_DIR/node_modules/.bin/grunt prod
 
 # unpack cache
 CACHED_DIRS="$SBT_USER_HOME/.ivy2 $SBT_USER_HOME/boot $SBT_BINDIR target project/target project/boot"
