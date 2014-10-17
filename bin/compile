@@ -83,7 +83,7 @@ npm install grunt
 echo "-----> Installing dependencies in package.json (npm install)"
 npm install
 echo "-----> Running grunt prod"
-grunt prod
+$PWD/node_modules/.bin/grunt prod
 
 # these are preliminary checks. actual version check happens below when attempting to download sbt boot.properties
 if ! test -e project/build.properties; then
